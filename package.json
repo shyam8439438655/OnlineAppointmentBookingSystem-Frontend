@@ -24,7 +24,7 @@
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-angular": "^1.0.0",
-    "ngx-toastr": "^20.0.5",
+    "ngx-toastr": "^19.0.0",
     "rxjs": "~7.8.0",
     "tailwind-merge": "^3.5.0",
     "tslib": "^2.3.0",
