@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">My Profile</h1>
+        <p class="text-slate-500 mt-1.5 font-medium">Manage your account information</p>
+      </div>
+
+      <div class="bg-white rounded-[1.5rem] border border-slate-200 p-8 mb-8 flex items-center gap-6 shadow-sm">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-teal-400 flex items-center justify-center text-4xl font-black text-white shrink-0 shadow-inner">
+          {{ (form.fullName || '').charAt(0) || '?' }}
+        </div>
+        <div>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ form.fullName }}</h2>
+          <p class="text-slate-500 font-medium text-sm mt-1">{{ form.email }}</p>
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold mt-3 border border-teal-100 uppercase tracking-wider">{{ auth.currentUser()?.role }}</span>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mb-8 bg-slate-100/80 backdrop-blur-sm border border-slate-200 rounded-xl p-1.5 w-fit shadow-sm">
+        <button (click)="activeTab.set('profile')"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
+          [ngClass]="activeTab() === 'profile' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'">
+          <lucide-icon [name]="UserIcon" class="w-4 h-4"></lucide-icon>Profile Info
+        </button>
+        <button (click)="activeTab.set('security')"
+          class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all"
+          [ngClass]="activeTab() === 'security' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'">
+          <lucide-icon [name]="Lock" class="w-4 h-4"></lucide-icon>Security
+        </button>
+      </div>
+
+      @if (activeTab() === 'profile') {
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 p-8 max-w-lg shadow-sm">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-6 tracking-tight">Personal Information</h2>
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
+              <div class="relative">
+                <lucide-icon [name]="UserIcon" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [(ngModel)]="form.fullName"
+                  class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="Full name" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+              <div class="relative">
+                <lucide-icon [name]="Mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [(ngModel)]="form.email"
+                  type="email" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="Email" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
+              <div class="relative">
+                <lucide-icon [name]="Phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [(ngModel)]="form.phone"
+                  type="tel" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="Phone" />
+              </div>
+            </div>
+            <button (click)="saveProfile()" [disabled]="saving()" class="w-full bg-indigo-600 text-white hover:bg-indigo-700 font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 mt-4 disabled:opacity-50">
+              @if (saving()) {
+                <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              } @else {
+                <lucide-icon [name]="Save" class="w-4 h-4"></lucide-icon> Save Changes
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (activeTab() === 'security') {
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 p-8 max-w-lg shadow-sm">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-6 tracking-tight">Change Password</h2>
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Current Password</label>
+              <div class="relative">
+                <lucide-icon [name]="Lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.currentPassword"
+                  class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-11 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="••••••" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">New Password</label>
+              <div class="relative">
+                <lucide-icon [name]="Lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.newPassword"
+                  class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-11 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="••••••" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-2">Confirm New Password</label>
+              <div class="relative">
+                <lucide-icon [name]="Lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></lucide-icon>
+                <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.confirmPassword"
+                  class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl pl-11 pr-11 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400" placeholder="••••••" />
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button (click)="showPwd.set(!showPwd())" type="button"
+                class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition-colors bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg">
+                <lucide-icon [name]="showPwd() ? EyeOff : Eye" class="w-3.5 h-3.5"></lucide-icon>
+                {{ showPwd() ? 'Hide' : 'Show' }} passwords
+              </button>
+            </div>
+            <button (click)="changePassword()" [disabled]="savingPwd()" class="w-full bg-slate-900 text-white hover:bg-slate-800 font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 mt-4 disabled:opacity-50">
+              @if (savingPwd()) {
+                <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              } @else {
+                <lucide-icon [name]="Shield" class="w-4 h-4"></lucide-icon> Update Password
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>

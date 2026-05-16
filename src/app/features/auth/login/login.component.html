@@ -1,0 +1,153 @@
+<div class="min-h-screen bg-white flex overflow-hidden font-outfit relative">
+  <!-- Top Progress Bar -->
+  <div *ngIf="loading()" class="absolute top-0 left-0 right-0 h-1 z-50 overflow-hidden">
+    <div class="h-full bg-indigo-600 animate-progress origin-left"></div>
+  </div>
+
+  <!-- Decorative background pattern -->
+  <div class="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-30 pointer-events-none"></div>
+
+  <!-- Left Side -->
+  <div class="hidden lg:flex lg:w-[45%] bg-[#F8FAFC] relative border-r border-slate-200/60 items-center justify-center p-8 overflow-hidden">
+    <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px]"></div>
+    
+    <div class="relative z-10 max-w-sm">
+      <a routerLink="/" class="flex items-center gap-4 mb-10 group no-underline">
+        <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-500">
+          <lucide-icon [name]="Activity" class="w-6 h-6 text-indigo-600"></lucide-icon>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-2xl font-black text-slate-900 tracking-tight leading-none">MediBook</span>
+        </div>
+      </a>
+
+      <h2 class="text-4xl font-black text-slate-900 leading-[1.1] mb-6 tracking-tighter">
+        Revolutionizing <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400">Healthcare access.</span>
+      </h2>
+      <p class="text-base text-slate-600 font-medium mb-10 opacity-80">
+        Empowering patients and providers through a seamless ecosystem.
+      </p>
+
+      <div class="space-y-6">
+        <div class="flex items-center gap-5 group">
+          <div class="w-12 h-12 rounded-xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-indigo-500">
+            <lucide-icon [name]="ShieldCheck" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-slate-900">Enterprise Security</p>
+            <p class="text-[12px] text-slate-500">End-to-end encryption</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-5 group">
+          <div class="w-12 h-12 rounded-xl bg-white shadow-md border border-slate-100 flex items-center justify-center text-teal-500">
+            <lucide-icon [name]="Stethoscope" class="w-6 h-6"></lucide-icon>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-slate-900">Expert Network</p>
+            <p class="text-[12px] text-slate-500">5,000+ Specialists</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side -->
+  <div class="w-full lg:w-[55%] flex flex-col justify-center relative bg-white px-8 py-10 lg:px-20 transition-all duration-700" [class.opacity-60]="loading()">
+    <div class="w-full max-w-md mx-auto relative z-10" [class.scale-[0.98]]="loading()">
+      <div class="mb-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-wider mb-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+          Secure Login Portal
+        </div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Welcome back</h1>
+        <p class="text-slate-500 text-base font-medium">Access your personalized health dashboard.</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-6">
+        <div class="group">
+          <label class="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 group-focus-within:text-indigo-600">Account Email</label>
+          <div class="relative flex items-center">
+            <div class="absolute left-5 w-10 h-full flex items-center justify-center pointer-events-none z-10">
+              <lucide-icon [name]="Mail" class="w-4 h-4 text-slate-300 group-focus-within:text-indigo-600"></lucide-icon>
+            </div>
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="form.email"
+              required
+              email
+              placeholder="you@example.com"
+              class="w-full pl-14 pr-6 bg-slate-50 border-2 border-slate-50 rounded-xl py-4 text-slate-900 text-sm font-semibold focus:bg-white focus:outline-none focus:border-indigo-600/20 transition-all shadow-sm"
+            />
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="flex items-center justify-between mb-2 ml-1">
+            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest group-focus-within:text-indigo-600">Access Password</label>
+            <a href="#" class="text-xs font-bold text-indigo-600 hover:underline underline-offset-4">Forgot?</a>
+          </div>
+          <div class="relative flex items-center">
+            <div class="absolute left-5 w-10 h-full flex items-center justify-center pointer-events-none z-10">
+              <lucide-icon [name]="Lock" class="w-4 h-4 text-slate-300 group-focus-within:text-indigo-600"></lucide-icon>
+            </div>
+            <input
+              [type]="showPwd() ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="form.password"
+              required
+              minlength="6"
+              placeholder="••••••••"
+              class="w-full pl-14 pr-12 bg-slate-50 border-2 border-slate-50 rounded-xl py-4 text-slate-900 text-sm font-semibold focus:bg-white focus:outline-none focus:border-indigo-600/20 transition-all shadow-sm"
+            />
+            <button
+              type="button"
+              (click)="showPwd.set(!showPwd())"
+              class="absolute right-3 w-10 h-10 flex items-center justify-center text-slate-300 hover:text-indigo-600 transition-all focus:outline-none"
+            >
+              <lucide-icon [name]="showPwd() ? EyeOff : Eye" class="w-4 h-4"></lucide-icon>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          [disabled]="loading() || !loginForm.form.valid" 
+          class="group/btn w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-4 font-black text-base shadow-xl shadow-indigo-600/20 transition-all flex justify-center items-center gap-3 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0 mt-4 disabled:cursor-not-allowed"
+        >
+          <ng-container *ngIf="!loading()">
+            <span>Sign In to Medibook</span>
+            <lucide-icon [name]="ArrowRight" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"></lucide-icon>
+          </ng-container>
+          <ng-container *ngIf="loading()">
+            <span class="flex items-center gap-3 italic text-sm">
+              <span class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+              Authenticating...
+            </span>
+          </ng-container>
+        </button>
+      </form>
+
+      <div class="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center gap-4">
+        <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">New to the platform?</p>
+        <a 
+          routerLink="/register" 
+          class="w-full py-3.5 rounded-xl border-2 border-slate-100 text-slate-900 font-black text-center text-sm hover:bg-slate-50 transition-all no-underline"
+        >
+          Create a New Account
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes progress {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .animate-progress {
+    animation: progress 1.5s infinite linear;
+  }
+</style>

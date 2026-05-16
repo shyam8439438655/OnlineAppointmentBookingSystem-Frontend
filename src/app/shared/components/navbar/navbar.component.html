@@ -1,0 +1,77 @@
+<nav class="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl bg-white border border-slate-200/60 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+          <lucide-icon [name]="Activity" class="w-5 h-5 text-indigo-600"></lucide-icon>
+        </div>
+        <span class="text-xl font-extrabold text-slate-900 tracking-tight">MediBook</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-6">
+        <a routerLink="/providers" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Browse Providers</a>
+        @if (auth.isLoggedIn()) {
+          <a [routerLink]="dashboardHref" class="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Dashboard</a>
+        }
+      </div>
+
+      <!-- Right -->
+      <div class="hidden md:flex items-center gap-4">
+        @if (auth.isLoggedIn()) {
+          <a routerLink="/notifications" class="relative w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors">
+            <lucide-icon [name]="Bell" class="w-4 h-4 text-slate-600"></lucide-icon>
+            @if (unreadCount() > 0) {
+              <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+              </span>
+            }
+          </a>
+          <div class="flex items-center gap-3 pl-2 border-l border-slate-200">
+            <div class="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-sm font-bold text-indigo-700">
+              {{ getInitials(auth.currentUser()?.fullName || '') }}
+            </div>
+            <div class="text-sm">
+              <p class="font-bold text-slate-900 leading-none">{{ auth.currentUser()?.fullName }}</p>
+              <p class="text-slate-500 text-xs mt-0.5 font-medium">{{ auth.currentUser()?.role }}</p>
+            </div>
+          </div>
+          <button (click)="logout()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors ml-2">
+            <lucide-icon [name]="LogOut" class="w-4 h-4"></lucide-icon> Logout
+          </button>
+        } @else {
+          <a routerLink="/login" class="text-sm font-bold text-slate-600 hover:text-slate-900 px-3 py-2">Login</a>
+          <a routerLink="/register" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5">Get Started</a>
+        }
+      </div>
+
+      <!-- Mobile toggle -->
+      <button class="md:hidden p-2 text-slate-600" (click)="toggleMobile()">
+        @if (mobileOpen()) {
+          <lucide-icon [name]="X" class="w-6 h-6"></lucide-icon>
+        } @else {
+          <lucide-icon [name]="Menu" class="w-6 h-6"></lucide-icon>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  @if (mobileOpen()) {
+    <div class="md:hidden border-t border-slate-200 bg-white px-4 pb-4 pt-2 space-y-2 shadow-xl">
+      <a routerLink="/providers" class="block px-4 py-3 rounded-xl text-slate-600 font-semibold hover:bg-slate-50" (click)="mobileOpen.set(false)">Browse Providers</a>
+      @if (auth.isLoggedIn()) {
+        <a [routerLink]="dashboardHref" class="block px-4 py-3 rounded-xl text-slate-600 font-semibold hover:bg-slate-50" (click)="mobileOpen.set(false)">Dashboard</a>
+        <button (click)="logout()" class="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-rose-600 font-semibold hover:bg-rose-50 text-left">
+          <lucide-icon [name]="LogOut" class="w-5 h-5"></lucide-icon> Logout
+        </button>
+      } @else {
+        <div class="flex flex-col gap-2 pt-2">
+          <a routerLink="/login" class="block text-center px-4 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-bold" (click)="mobileOpen.set(false)">Login</a>
+          <a routerLink="/register" class="block text-center px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold" (click)="mobileOpen.set(false)">Register</a>
+        </div>
+      }
+    </div>
+  }
+</nav>

@@ -1,0 +1,128 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full min-h-screen">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Appointments</h1>
+        <p class="text-slate-500 font-medium mt-1.5">{{ appointments().length }} total appointments</p>
+      </div>
+
+      <div class="flex gap-2 mb-8 flex-wrap">
+        @for (f of ['All', 'Scheduled', 'Completed', 'Cancelled', 'No-Show']; track f) {
+          <button (click)="filter.set(f)"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm"
+            [ngClass]="filter() === f ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200 hover:bg-indigo-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'">
+            {{ f }}
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        @if (filteredAppointments().length === 0) {
+          <div class="bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 text-center py-20">
+            <lucide-icon [name]="Calendar" class="w-16 h-16 text-slate-300 mx-auto mb-4"></lucide-icon>
+            <p class="text-slate-500 font-bold text-lg">No appointments found</p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (a of filteredAppointments(); track a.appointmentId) {
+              <div class="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-6 flex flex-col md:flex-row gap-5 items-start md:items-center">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex flex-col items-center justify-center shrink-0">
+                  <span class="text-indigo-500 text-xs font-bold uppercase tracking-wider">{{ formatDate(a.appointmentDate).slice(0, 3) }}</span>
+                  <span class="text-indigo-700 font-black text-xl leading-none mt-0.5">{{ formatDate(a.appointmentDate).slice(4, 6) }}</span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex flex-wrap items-center gap-3 mb-1.5">
+                    <h3 class="font-extrabold text-slate-900 text-lg tracking-tight">{{ a.serviceType || 'Consultation' }}</h3>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold" [ngClass]="getStatusColor(a.status)">{{ a.status }}</span>
+                  </div>
+                  <p class="text-slate-500 text-sm font-medium flex items-center gap-1.5">
+                    <lucide-icon [name]="Clock" class="w-4 h-4 text-slate-400"></lucide-icon>{{ formatTime(a.startTime) }} · {{ a.modeOfConsultation }}
+                  </p>
+                  <p class="text-slate-400 text-xs font-semibold mt-2 uppercase tracking-wide">Patient Ref: {{ a.patientId }}</p>
+                </div>
+                <div class="flex gap-3 w-full md:w-auto">
+                  @if (a.status?.toUpperCase() === 'SCHEDULED') {
+                    <button (click)="completeAppointment(a.appointmentId)" class="w-full md:w-auto bg-white border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                      <lucide-icon [name]="CheckCircle" class="w-4 h-4"></lucide-icon> Complete
+                    </button>
+                  }
+                  @if (a.status?.toUpperCase() === 'COMPLETED') {
+                    <button (click)="recordModal.set(a)" class="w-full md:w-auto bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+                      <lucide-icon [name]="FileText" class="w-4 h-4"></lucide-icon> Add Record
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+
+      <!-- Medical record modal -->
+      @if (recordModal()) {
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div class="bg-white rounded-[2rem] p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Create Medical Record</h2>
+              <button (click)="recordModal.set(null)" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <lucide-icon [name]="X" class="w-5 h-5"></lucide-icon>
+              </button>
+            </div>
+            
+            <div class="bg-indigo-50/50 rounded-xl p-4 mb-6 border border-indigo-100 flex items-center gap-3">
+              <lucide-icon [name]="FileText" class="w-5 h-5 text-indigo-500"></lucide-icon>
+              <div>
+                <p class="text-sm font-bold text-slate-900">Patient: {{ recordModal()!.patientId }}</p>
+                <p class="text-xs text-slate-500 font-medium">For appointment on {{ formatDate(recordModal()!.appointmentDate) }}</p>
+              </div>
+            </div>
+
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Diagnosis <span class="text-rose-500">*</span></label>
+                <textarea [(ngModel)]="recordForm.diagnosis" rows="2" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none" placeholder="Primary diagnosis..."></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Prescription</label>
+                <textarea [(ngModel)]="recordForm.prescription" rows="3" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none" placeholder="Medications and dosage..."></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Clinical Notes</label>
+                <textarea [(ngModel)]="recordForm.notes" rows="3" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none" placeholder="Additional clinical notes..."></textarea>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Follow-up Date</label>
+                  <input type="date" [(ngModel)]="recordForm.followUpDate" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Attachment URL</label>
+                  <input type="url" [(ngModel)]="recordForm.attachmentUrl" placeholder="https://..." class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 mt-8">
+              <button (click)="recordModal.set(null)" class="flex-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all shadow-sm">Cancel</button>
+              <button (click)="submitRecord()" [disabled]="submittingRecord()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2">
+                @if (submittingRecord()) {
+                  <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                } @else {
+                  <lucide-icon [name]="Plus" class="w-4 h-4"></lucide-icon> Save Record
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>

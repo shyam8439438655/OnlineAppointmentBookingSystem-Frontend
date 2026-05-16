@@ -1,0 +1,82 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <lucide-icon [name]="MessageSquare" class="w-8 h-8 text-indigo-600"></lucide-icon> Moderate Reviews
+          </h1>
+          <p class="text-slate-500 mt-1.5 font-medium">{{ reviews().length }} reviews on the platform</p>
+        </div>
+        <button (click)="handleDeleteAll()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-200 flex items-center gap-2 text-sm self-start md:self-auto">
+          <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon> Delete All Reviews
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        @if (reviews().length === 0) {
+          <div class="text-center py-20 bg-white rounded-[1.5rem] border-2 border-dashed border-slate-200 shadow-sm">
+            <lucide-icon [name]="MessageSquare" class="w-14 h-14 text-slate-300 mx-auto mb-4"></lucide-icon>
+            <p class="text-slate-500 font-medium">No reviews yet</p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (r of reviews(); track r.reviewId) {
+              <div class="bg-white rounded-[1.5rem] p-6 flex items-start gap-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                  <lucide-icon [name]="Star" class="w-6 h-6 text-amber-500"></lucide-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="flex gap-0.5">
+                      @for (i of [1,2,3,4,5]; track i) {
+                        <span class="text-lg" [ngClass]="i <= r.rating ? 'text-amber-400' : 'text-slate-200'">★</span>
+                      }
+                    </div>
+                    <span class="text-slate-400 text-sm font-medium">{{ formatDate(r.reviewDate) }}</span>
+                    @if (r.isAnonymous) {
+                      <span class="px-2.5 py-1 rounded bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">Anonymous</span>
+                    }
+                  </div>
+                  <p class="text-slate-700 font-medium text-[15px]">{{ r.comment || 'No comment provided' }}</p>
+                  @if (r.isFlagged) {
+                    <div class="mt-3 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3">
+                      <lucide-icon [name]="Flag" class="w-4 h-4 text-rose-500 mt-0.5 fill-rose-500"></lucide-icon>
+                      <div>
+                        <p class="text-rose-800 text-xs font-bold uppercase tracking-wider">Flagged by Provider</p>
+                        <p class="text-rose-600 text-sm font-medium mt-1 italic">Reason: {{ r.flagReason || 'No reason provided' }}</p>
+                      </div>
+                    </div>
+                  }
+                  <div class="flex gap-5 mt-3 text-xs text-slate-500 font-semibold bg-slate-50 px-3 py-2 rounded-lg inline-flex border border-slate-100">
+                    <span>Patient: <span class="text-indigo-600 font-mono text-[10px]">{{ r.patientId }}</span></span>
+                    <span>Provider: <span class="text-teal-600 font-mono text-[10px]">{{ r.providerId }}</span></span>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  @if (r.isFlagged) {
+                    <button (click)="unflagReview(r.reviewId)" title="Dismiss Flag" class="p-2.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition-all rounded-xl shrink-0">
+                      <lucide-icon [name]="Check" class="w-5 h-5"></lucide-icon>
+                    </button>
+                  }
+                  <button (click)="deleteReview(r.reviewId)" [title]="r.isFlagged ? 'Delete Inappropriate Review' : 'Remove Review'" class="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all rounded-xl shrink-0">
+                    <lucide-icon [name]="Trash2" class="w-5 h-5"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

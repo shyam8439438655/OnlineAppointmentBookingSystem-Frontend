@@ -1,0 +1,179 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
+          <p class="text-slate-500 mt-1.5 font-medium">{{ apiUnreadCount() }} unread · {{ notifications().length }} total</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <!-- Admin-only: Send Alert button -->
+          @if (auth.currentUser()?.role === 'Admin') {
+            <button (click)="showBroadcast.set(!showBroadcast())"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all shadow-md shadow-indigo-200 flex items-center gap-2 text-sm">
+              <lucide-icon [name]="Send" class="w-4 h-4"></lucide-icon> Send Alert
+            </button>
+          }
+          <button (click)="markAllRead()" class="bg-white border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2 text-sm">
+            <lucide-icon [name]="CheckCheck" class="w-4 h-4"></lucide-icon> Mark all read
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Broadcast Panel -->
+      @if (auth.currentUser()?.role === 'Admin' && showBroadcast()) {
+        <div class="bg-white rounded-[1.5rem] border border-indigo-200 shadow-lg shadow-indigo-100/50 p-6 mb-8 ring-1 ring-indigo-100">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
+              <lucide-icon [name]="Send" class="w-5 h-5 text-white"></lucide-icon>
+            </div>
+            <div>
+              <h2 class="text-lg font-extrabold text-slate-900">Send Platform Alert</h2>
+              <p class="text-slate-500 text-sm font-medium">Dispatch notifications via APP, EMAIL, or SMS</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <!-- Target -->
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Send To</label>
+              <select [(ngModel)]="broadcastForm.target"
+                class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 transition-all">
+                <option value="ALL">All Users</option>
+                <option value="PATIENTS">All Patients</option>
+                <option value="PROVIDERS">All Providers</option>
+                <option value="SPECIFIC">Specific Person</option>
+              </select>
+            </div>
+
+            <!-- Type -->
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Type</label>
+              <select [(ngModel)]="broadcastForm.type"
+                class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 transition-all">
+                <option value="BOOKING">Booking</option>
+                <option value="REMINDER">Reminder</option>
+                <option value="CANCELLATION">Cancellation</option>
+                <option value="PAYMENT">Payment</option>
+                <option value="FOLLOWUP">Follow-up</option>
+              </select>
+            </div>
+
+            <!-- Channel -->
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Channel</label>
+              <div class="flex gap-2">
+                @for (ch of ['APP', 'EMAIL', 'SMS']; track ch) {
+                  <button (click)="broadcastForm.channel = ch"
+                    class="flex-1 py-2.5 rounded-xl text-xs font-extrabold transition-all border-2"
+                    [ngClass]="broadcastForm.channel === ch
+                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                      : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300'">
+                    {{ ch }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Recipient ID (only for SPECIFIC) -->
+            @if (broadcastForm.target === 'SPECIFIC') {
+              <div>
+                <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Recipient ID</label>
+                <input type="text" [(ngModel)]="broadcastForm.recipientId" placeholder="Paste userId or providerId"
+                  class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 transition-all" />
+              </div>
+            }
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Title <span class="text-rose-500">*</span></label>
+              <input type="text" [(ngModel)]="broadcastForm.title" placeholder="e.g. Platform Maintenance Alert"
+                class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 transition-all" />
+            </div>
+            <div>
+              <label class="block text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">Message <span class="text-rose-500">*</span></label>
+              <input type="text" [(ngModel)]="broadcastForm.message" placeholder="Your message content..."
+                class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 transition-all" />
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button (click)="showBroadcast.set(false)"
+              class="px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border-2 border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
+              Cancel
+            </button>
+            <button (click)="sendAlert()" [disabled]="sendingAlert()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-200 flex items-center gap-2 text-sm disabled:opacity-60">
+              @if (sendingAlert()) {
+                <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Sending...
+              } @else {
+                <lucide-icon [name]="Send" class="w-4 h-4"></lucide-icon>
+                @if (broadcastForm.target === 'ALL') { Send to All Users }
+                @else if (broadcastForm.target === 'PATIENTS') { Send to All Patients }
+                @else if (broadcastForm.target === 'PROVIDERS') { Send to All Providers }
+                @else { Send Notification }
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Notifications List -->
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        @if (notifications().length === 0) {
+          <div class="text-center py-20 bg-white rounded-[1.5rem] border-2 border-dashed border-slate-200 shadow-sm max-w-2xl mx-auto">
+            <lucide-icon [name]="Bell" class="w-14 h-14 text-slate-300 mx-auto mb-4"></lucide-icon>
+            <p class="text-slate-700 font-bold text-lg">No notifications yet</p>
+            <p class="text-slate-500 font-medium text-sm mt-1">We'll let you know when something arrives</p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (n of notifications(); track n.notificationId) {
+              <div
+                (click)="markRead(n)"
+                class="bg-white rounded-[1.5rem] border p-5 flex items-start gap-5 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
+                [ngClass]="!n.isRead ? 'border-indigo-200 shadow-sm ring-1 ring-indigo-50/50' : 'border-slate-200 opacity-80'"
+              >
+                <div class="w-12 h-12 rounded-xl border flex items-center justify-center shrink-0" [ngClass]="getConfig(n.type).bg">
+                  <lucide-icon [name]="getConfig(n.type).icon" class="w-6 h-6" [ngClass]="getConfig(n.type).color"></lucide-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-extrabold text-lg truncate" [ngClass]="!n.isRead ? 'text-slate-900' : 'text-slate-700'">{{ n.title }}</p>
+                    @if (!n.isRead) {
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 uppercase tracking-wider shrink-0">New</span>
+                    }
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0"
+                      [ngClass]="n.channel === 'EMAIL' ? 'bg-blue-100 text-blue-700' : n.channel === 'SMS' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'">
+                      {{ n.channel }}
+                    </span>
+                  </div>
+                  <p class="text-sm mt-1 mb-2" [ngClass]="!n.isRead ? 'text-slate-600 font-medium' : 'text-slate-500'">{{ n.message }}</p>
+                  <p class="text-slate-400 text-xs font-bold flex items-center gap-1.5"><lucide-icon [name]="Clock" class="w-3.5 h-3.5"></lucide-icon>{{ formatDate(n.sentAt) }}</p>
+                </div>
+                <button
+                  (click)="deleteNotif(n.notificationId); $event.stopPropagation()"
+                  class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
+                >
+                  <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

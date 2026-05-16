@@ -1,0 +1,209 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full min-h-screen">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Provider Profile</h1>
+        <p class="text-slate-500 mt-1.5 font-medium">Manage your professional credentials and clinic details</p>
+      </div>
+
+      <div class="grid lg:grid-cols-[1fr_300px] gap-8">
+        <div class="space-y-8">
+          <!-- Avatar card -->
+          <div class="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full opacity-50 transition-transform group-hover:scale-110"></div>
+            <div class="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-indigo-600 to-indigo-800 p-1 shadow-xl shadow-indigo-100 shrink-0">
+              <div class="w-full h-full bg-white/10 backdrop-blur-sm rounded-[2.2rem] flex items-center justify-center text-5xl font-black text-white">
+                {{ (userForm.fullName || '').charAt(0) || '?' }}
+              </div>
+            </div>
+            <div class="text-center md:text-left z-10">
+              <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ userForm.fullName }}</h2>
+              <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-100 uppercase tracking-wider">
+                  <lucide-icon [name]="Stethoscope" class="w-3.5 h-3.5 mr-1.5"></lucide-icon> {{ providerForm.specialization || 'Not Set' }}
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-xs font-bold border border-slate-200 uppercase tracking-wider">
+                  <lucide-icon [name]="Mail" class="w-3.5 h-3.5 mr-1.5"></lucide-icon> {{ userForm.email }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="bg-slate-200/50 backdrop-blur-sm rounded-[1.5rem] p-1.5 flex flex-wrap gap-1 border border-slate-200 shadow-inner">
+            <button (click)="activeTab.set('profile')"
+              class="flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-[1.2rem] text-sm font-bold transition-all"
+              [ngClass]="activeTab() === 'profile' ? 'bg-white text-indigo-600 shadow-md border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40'">
+              <lucide-icon [name]="UserIcon" class="w-4.5 h-4.5"></lucide-icon>Personal Info
+            </button>
+            <button (click)="activeTab.set('clinic')"
+              class="flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-[1.2rem] text-sm font-bold transition-all"
+              [ngClass]="activeTab() === 'clinic' ? 'bg-white text-indigo-600 shadow-md border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40'">
+              <lucide-icon [name]="Stethoscope" class="w-4.5 h-4.5"></lucide-icon>Clinic & Professional
+            </button>
+            <button (click)="activeTab.set('security')"
+              class="flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-[1.2rem] text-sm font-bold transition-all"
+              [ngClass]="activeTab() === 'security' ? 'bg-white text-indigo-600 shadow-md border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-white/40'">
+              <lucide-icon [name]="Lock" class="w-4.5 h-4.5"></lucide-icon>Password & Security
+            </button>
+          </div>
+
+          <!-- Forms -->
+          <div class="bg-white rounded-[2rem] p-8 md:p-10 border border-slate-200 shadow-sm min-h-[500px]">
+            @if (activeTab() === 'profile') {
+              <div class="max-w-xl">
+                <div class="mb-8">
+                  <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Personal Information</h2>
+                  <p class="text-slate-500 text-sm mt-1">Basic details for your account</p>
+                </div>
+                <div class="space-y-6">
+                  <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                      <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Full Name</label>
+                      <div class="relative">
+                        <lucide-icon [name]="UserIcon" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></lucide-icon>
+                        <input [(ngModel)]="userForm.fullName" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-12 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Email Address</label>
+                      <div class="relative">
+                        <lucide-icon [name]="Mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></lucide-icon>
+                        <input [(ngModel)]="userForm.email" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-12 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Phone Number</label>
+                      <div class="relative">
+                        <lucide-icon [name]="Phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></lucide-icon>
+                        <input [(ngModel)]="userForm.phone" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-12 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                      </div>
+                    </div>
+                  </div>
+                  <button (click)="saveUserProfile()" [disabled]="saving()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 mt-10">
+                    @if (saving()) {
+                      <span class="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    } @else {
+                      <lucide-icon [name]="Save" class="w-5 h-5"></lucide-icon> Save Changes
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (activeTab() === 'clinic') {
+              <div>
+                <div class="mb-8">
+                  <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Professional Credentials</h2>
+                  <p class="text-slate-500 text-sm mt-1">Information about your practice and expertise</p>
+                </div>
+                @if (!providerId) {
+                  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8 flex items-start gap-4">
+                    <lucide-icon [name]="AlertCircle" class="w-6 h-6 text-amber-500 shrink-0 mt-0.5"></lucide-icon>
+                    <p class="text-amber-800 text-sm font-medium">Your provider profile is incomplete. Fill in the details below to get verified.</p>
+                  </div>
+                }
+                <div class="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Specialization</label>
+                    <select [(ngModel)]="providerForm.specialization" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                      <option value="">Select Specialization</option>
+                      @for (s of specializations; track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Qualification</label>
+                    <input [(ngModel)]="providerForm.qualification" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Years of Experience</label>
+                    <input type="number" [(ngModel)]="providerForm.experienceYears" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Consultation Fee (₹)</label>
+                    <input type="number" [(ngModel)]="providerForm.consultationFee" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Clinic Name</label>
+                    <input [(ngModel)]="providerForm.clinicName" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Clinic Address</label>
+                    <input [(ngModel)]="providerForm.clinicAddress" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Professional Bio</label>
+                    <textarea [(ngModel)]="providerForm.bio" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"></textarea>
+                  </div>
+                </div>
+                <button (click)="saveProviderProfile()" [disabled]="saving()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 mt-10">
+                  @if (saving()) {
+                    <span class="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  } @else {
+                    <lucide-icon [name]="Save" class="w-5 h-5"></lucide-icon> {{ providerId ? 'Update Credentials' : 'Create Profile' }}
+                  }
+                </button>
+              </div>
+            }
+
+            @if (activeTab() === 'security') {
+              <div class="max-w-xl">
+                <div class="mb-8">
+                  <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Change Password</h2>
+                  <p class="text-slate-500 text-sm mt-1">Keep your account secure</p>
+                </div>
+                <div class="space-y-6">
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Current Password</label>
+                    <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.currentPassword" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">New Password</label>
+                    <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.newPassword" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Confirm New Password</label>
+                    <input [type]="showPwd() ? 'text' : 'password'" [(ngModel)]="pwdForm.confirmPassword" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" />
+                  </div>
+                  <button (click)="showPwd.set(!showPwd())" class="text-xs font-bold text-slate-400 hover:text-indigo-600 uppercase tracking-widest transition-colors">
+                    {{ showPwd() ? 'Hide' : 'Show' }} Passwords
+                  </button>
+                  <button (click)="changePassword()" [disabled]="savingPwd()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-10 rounded-2xl transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 mt-10 w-full">
+                    @if (savingPwd()) {
+                      <span class="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    } @else {
+                      <lucide-icon [name]="Shield" class="w-5 h-5"></lucide-icon> Update Password
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Sidebar status -->
+        <div class="space-y-6">
+          <div class="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
+            <h3 class="text-xl font-black mb-4 relative z-10">Verification Status</h3>
+            <div class="flex items-center gap-3 relative z-10">
+              <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+                <lucide-icon [name]="Shield" class="w-5 h-5"></lucide-icon>
+              </div>
+              <div>
+                <p class="text-xs font-bold uppercase tracking-widest opacity-80">Rank</p>
+                <p class="text-lg font-black">{{ providerId ? 'Verified Partner' : 'Pending Verification' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

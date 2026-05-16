@@ -1,0 +1,103 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <lucide-icon [name]="CreditCard" class="w-8 h-8 text-indigo-600"></lucide-icon> Payment Transactions
+          </h1>
+          <p class="text-slate-500 mt-1.5 font-medium">Monitor all platform revenue and refunds</p>
+        </div>
+        <div class="bg-white border border-slate-200 shadow-sm px-6 py-4 rounded-[1.5rem] flex items-center gap-6">
+           <div>
+             <p class="text-xs uppercase font-bold text-slate-400 tracking-wider">Total Revenue</p>
+             <p class="text-2xl font-extrabold text-emerald-600 mt-0.5">₹{{ totalCollected() | number:'1.0-0' }}</p>
+           </div>
+           <div class="w-px h-10 bg-slate-200"></div>
+           <button 
+            (click)="downloadReport()"
+            class="p-3 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm"
+            title="Download Revenue Report"
+           >
+             <lucide-icon [name]="Download" class="w-5 h-5"></lucide-icon>
+           </button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 mb-8">
+        <button (click)="handleDeleteAll()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-200 flex items-center gap-2 text-sm">
+          <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon> Delete All Records
+        </button>
+        <div class="relative flex-1 md:flex-none">
+          <lucide-icon [name]="Search" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></lucide-icon>
+          <input 
+            type="text" 
+            placeholder="Search by Transaction ID or Appointment ID..." 
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            class="w-full md:w-[480px] bg-white border-2 border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-sm" 
+          />
+        </div>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <caption class="sr-only">Financial transactions and payment records table</caption>
+              <thead>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Transaction ID</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Appointment</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Amount</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                  <th class="py-4 px-6 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50">
+                @for (p of filteredPayments(); track p.paymentId) {
+                  <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6 font-mono text-sm font-semibold text-indigo-600">{{ p.transactionId || 'CASH' }}</td>
+                    <td class="py-4 px-6">
+                      <p class="text-xs font-bold text-slate-700">#{{ p.appointmentId }}</p>
+                      <p class="text-[10px] text-slate-400">Patient: {{ p.patientId }}</p>
+                    </td>
+                    <td class="py-4 px-6 font-bold text-slate-900">₹{{ p.amount }}</td>
+                    <td class="py-4 px-6">
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-sm font-bold" [ngClass]="p.status?.toUpperCase() === 'PAID' ? 'text-emerald-700' : 'text-rose-700'">{{ p.status }}</span>
+                      </div>
+                    </td>
+                    <td class="py-4 px-6 text-sm text-slate-500 font-medium">{{ p.paidAt ? formatDate(p.paidAt) : '—' }}</td>
+                    <td class="py-4 px-6 text-right">
+                      <div class="flex justify-end gap-2 items-center">
+                        @if (p.status?.toUpperCase() === 'REFUND_REQUESTED') {
+                          <button (click)="handleApproveRefund(p.paymentId)" class="text-[10px] font-bold uppercase bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-lg">Approve</button>
+                          <button (click)="handleRejectRefund(p.paymentId)" class="text-[10px] font-bold uppercase bg-rose-50 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg">Reject</button>
+                        }
+                        @if (p.status?.toUpperCase() === 'PAID') {
+                          <button (click)="handleRefund(p.paymentId)" class="text-[10px] font-bold uppercase bg-rose-50 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg">Refund</button>
+                        }
+                        <button (click)="handleDelete(p.paymentId)" class="p-2 text-slate-400 hover:text-rose-600"><lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>

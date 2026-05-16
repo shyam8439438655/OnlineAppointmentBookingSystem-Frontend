@@ -1,0 +1,109 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[60vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+              <lucide-icon [name]="UsersIcon" class="w-8 h-8 text-indigo-600"></lucide-icon> User Management
+            </h1>
+            <p class="text-slate-500 mt-1.5 font-medium">Manage platform patients and staff</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button (click)="handleDeleteAll()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-200 flex items-center gap-2 text-sm">
+              <lucide-icon [name]="ShieldAlert" class="w-4 h-4"></lucide-icon> Delete All Users
+            </button>
+            <div class="relative">
+              <lucide-icon [name]="SearchIcon" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></lucide-icon>
+              <input 
+                type="text" 
+                placeholder="Search by name or email..." 
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
+                class="w-full md:w-80 bg-white border-2 border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-sm" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <caption class="sr-only">List of registered platform users and their roles</caption>
+              <thead>
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">User Details</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                  <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Joined Date</th>
+                  <th class="py-4 px-6 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-50 text-sm">
+                @for (u of filteredUsers(); track u.userId) {
+                  <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 px-6">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-sm font-bold text-indigo-600">
+                          {{ u.fullName[0] || u.email[0].toUpperCase() }}
+                        </div>
+                        <div>
+                          <p class="text-sm font-bold text-slate-900">{{ u.fullName || 'No Name' }}</p>
+                          <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                            <lucide-icon [name]="Mail" class="w-3.5 h-3.5 text-slate-400"></lucide-icon> {{ u.email }}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-4 px-6">
+                      <span class="font-bold" [ngClass]="u.role === 'Admin' ? 'text-rose-600' : u.role === 'Provider' ? 'text-teal-600' : 'text-blue-600'">
+                        {{ u.role }}
+                      </span>
+                    </td>
+                    <td class="py-4 px-6">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold"
+                        [ngClass]="u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                        {{ u.isActive ? 'Active' : 'Suspended' }}
+                      </span>
+                    </td>
+                    <td class="py-4 px-6 text-slate-500 font-medium">
+                      {{ formatDate(u.createdAt) }}
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                      @if (u.userId !== auth.currentUser()?.userId) {
+                        <button 
+                          (click)="handleSuspend(u.userId, u.isActive)"
+                          class="p-2.5 rounded-lg transition-all text-slate-400"
+                          [ngClass]="u.isActive ? 'hover:text-red-600 hover:bg-red-50' : 'hover:text-green-600 hover:bg-green-50'"
+                          [title]="u.isActive ? 'Suspend User' : 'Activate User'"
+                        >
+                          <lucide-icon [name]="u.isActive ? UserMinus : UserCheck" class="w-4 h-4"></lucide-icon>
+                        </button>
+                        <button 
+                          (click)="handleDelete(u.userId)"
+                          class="p-2.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          title="Delete User"
+                        >
+                          <lucide-icon [name]="ShieldAlert" class="w-4 h-4"></lucide-icon>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>

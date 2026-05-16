@@ -1,0 +1,53 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">My Reviews</h1>
+        <p class="text-slate-500 mt-1.5 font-medium">{{ reviews().length }} reviews submitted</p>
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        @if (reviews().length === 0) {
+          <div class="text-center py-20 bg-white rounded-[1.5rem] border-2 border-dashed border-slate-200 shadow-sm max-w-2xl mx-auto">
+            <lucide-icon [name]="MessageSquare" class="w-14 h-14 text-slate-300 mx-auto mb-4"></lucide-icon>
+            <p class="text-slate-700 font-bold text-lg">No reviews yet</p>
+            <p class="text-slate-500 font-medium text-sm mt-1">Rate providers after completed appointments</p>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            @for (r of reviews(); track r.reviewId) {
+              <div class="bg-white rounded-[1.5rem] border border-slate-200 p-6 flex items-start gap-5 shadow-sm hover:shadow-md transition-all">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                  <lucide-icon [name]="Star" class="w-6 h-6 text-amber-500" fill="currentColor"></lucide-icon>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="flex gap-0.5">
+                      @for (i of [1,2,3,4,5]; track i) {
+                        <span class="text-xl" [ngClass]="i <= r.rating ? 'text-amber-400' : 'text-slate-200'">★</span>
+                      }
+                    </div>
+                    <span class="text-slate-400 text-xs font-bold">{{ formatDate(r.reviewDate) }}</span>
+                  </div>
+                  <p class="text-slate-700 font-medium text-sm">{{ r.comment }}</p>
+                </div>
+                <button (click)="deleteReview(r.reviewId)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0">
+                  <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

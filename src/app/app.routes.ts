@@ -1,0 +1,61 @@
+import { Routes } from '@angular/router';
+import { HomeComponent } from './features/home/home.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
+import { PatientDashboardComponent } from './features/patient/dashboard/dashboard.component';
+import { PatientAppointmentsComponent } from './features/patient/appointments/patient-appointments.component';
+import { PatientRecordsComponent } from './features/patient/records/patient-records.component';
+import { PatientProfileComponent } from './features/patient/profile/patient-profile.component';
+import { PatientPaymentsComponent } from './features/patient/payments/patient-payments.component';
+import { PatientReviewsComponent } from './features/patient/reviews/patient-reviews.component';
+import { ProviderDashboardComponent } from './features/provider/dashboard/dashboard.component';
+import { ProviderAppointmentsComponent } from './features/provider/appointments/provider-appointments.component';
+import { ProviderRecordsComponent } from './features/provider/records/provider-records.component';
+import { ProviderEarningsComponent } from './features/provider/earnings/provider-earnings.component';
+import { ProviderSettingsComponent } from './features/provider/settings/provider-settings.component';
+import { ProviderReviewsComponent } from './features/provider/reviews/provider-reviews.component';
+import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
+import { AdminUsersComponent } from './features/admin/users/admin-users.component';
+import { AdminProvidersComponent } from './features/admin/providers/admin-providers.component';
+import { AdminAppointmentsComponent } from './features/admin/appointments/admin-appointments.component';
+import { AdminPaymentsComponent } from './features/admin/payments/admin-payments.component';
+import { AdminReviewsComponent } from './features/admin/reviews/admin-reviews.component';
+import { AdminAnalyticsComponent } from './features/admin/analytics/admin-analytics.component';
+import { AdminRecordsComponent } from './features/admin/records/admin-records.component';
+import { NotificationsComponent } from './features/notifications/notifications.component';
+import { ProvidersListComponent } from './features/providers/providers-list.component';
+import { ProviderProfileComponent } from './features/providers/provider-profile.component';
+import { BookingComponent } from './features/patient/book/booking.component';
+import { ManageSlotsComponent } from './features/provider/slots/manage-slots.component';
+
+export const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'patient/dashboard', component: PatientDashboardComponent },
+  { path: 'patient/appointments', component: PatientAppointmentsComponent },
+  { path: 'patient/records', component: PatientRecordsComponent },
+  { path: 'patient/profile', component: PatientProfileComponent },
+  { path: 'patient/payments', component: PatientPaymentsComponent },
+  { path: 'patient/reviews', component: PatientReviewsComponent },
+  { path: 'patient/book', component: BookingComponent },
+  { path: 'provider/dashboard', component: ProviderDashboardComponent },
+  { path: 'provider/appointments', component: ProviderAppointmentsComponent },
+  { path: 'provider/records', component: ProviderRecordsComponent },
+  { path: 'provider/earnings', component: ProviderEarningsComponent },
+  { path: 'provider/settings', component: ProviderSettingsComponent },
+  { path: 'provider/reviews', component: ProviderReviewsComponent },
+  { path: 'provider/slots', component: ManageSlotsComponent },
+  { path: 'admin/dashboard', component: AdminDashboardComponent },
+  { path: 'admin/users', component: AdminUsersComponent },
+  { path: 'admin/providers', component: AdminProvidersComponent },
+  { path: 'admin/appointments', component: AdminAppointmentsComponent },
+  { path: 'admin/payments', component: AdminPaymentsComponent },
+  { path: 'admin/reviews', component: AdminReviewsComponent },
+  { path: 'admin/analytics', component: AdminAnalyticsComponent },
+  { path: 'admin/records', component: AdminRecordsComponent },
+  { path: 'notifications', component: NotificationsComponent },
+  { path: 'providers', component: ProvidersListComponent },
+  { path: 'providers/:id', component: ProviderProfileComponent },
+  { path: '**', redirectTo: '' }
+];

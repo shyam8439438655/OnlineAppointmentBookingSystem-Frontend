@@ -1,0 +1,105 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+  <div class="flex flex-1 relative z-10">
+    <app-sidebar></app-sidebar>
+    <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <lucide-icon [name]="CalendarIcon" class="w-8 h-8 text-indigo-600"></lucide-icon> All Appointments
+          </h1>
+          <p class="text-slate-500 mt-1.5 font-medium">{{ appointments().length }} total platform appointments</p>
+        </div>
+        <button (click)="handleDeleteAll()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-rose-200 flex items-center gap-2 text-sm self-start md:self-auto">
+          <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon> Delete All Appointments
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-3 mb-8 flex-wrap">
+        <div class="relative flex-1 min-w-[280px]">
+          <lucide-icon [name]="SearchIcon" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></lucide-icon>
+          <input type="text" [(ngModel)]="search"
+            placeholder="Search by service, patient ID..." class="w-full bg-white border-2 border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-slate-400 shadow-sm" />
+        </div>
+        @for (f of statusFilters; track f) {
+          <button (click)="filter.set(f)"
+            class="px-5 py-3 rounded-xl text-sm font-bold border-2 transition-all shadow-sm"
+            [ngClass]="filter() === f ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'">
+            {{ f }}
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <div class="flex items-center justify-center h-[50vh]">
+          <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+        </div>
+      } @else {
+        @if (filteredAppointments().length === 0) {
+          <div class="text-center py-20 bg-white rounded-[1.5rem] border-2 border-dashed border-slate-200 shadow-sm">
+            <lucide-icon [name]="CalendarIcon" class="w-14 h-14 text-slate-300 mx-auto mb-4"></lucide-icon>
+            <p class="text-slate-500 font-medium">No appointments found matching your criteria</p>
+          </div>
+        } @else {
+          <div class="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <caption class="sr-only">Platform-wide appointments overview and management table</caption>
+                <thead>
+                  <tr class="border-b border-slate-100 bg-slate-50/50">
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">ID</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Service</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Date & Time</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Mode</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Patient</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Provider</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                    <th class="py-4 px-6 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-sm">
+                  @for (a of filteredAppointments(); track a.appointmentId) {
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                      <td class="py-4 px-6 font-mono text-sm font-medium text-slate-500">#{{ a.appointmentId }}</td>
+                      <td class="py-4 px-6 font-bold text-slate-900">{{ a.serviceType || 'Consultation' }}</td>
+                      <td class="py-4 px-6">
+                        <p class="font-semibold text-slate-900">{{ formatDate(a.appointmentDate) }}</p>
+                        <p class="text-xs text-slate-500 font-medium">{{ formatTime(a.startTime) }}</p>
+                      </td>
+                      <td class="py-4 px-6">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold"
+                          [ngClass]="a.modeOfConsultation === 'Teleconsultation' ? 'bg-purple-100 text-purple-700' : 'bg-teal-100 text-teal-700'">
+                          {{ a.modeOfConsultation || 'In-Person' }}
+                        </span>
+                      </td>
+                      <td class="py-4 px-6">
+                        <p class="font-bold text-slate-900">{{ a.patientName || 'Patient' }}</p>
+                        <p class="text-[10px] text-slate-500 font-mono select-all">ID: {{ a.patientId }}</p>
+                      </td>
+                      <td class="py-4 px-6">
+                        <p class="font-bold text-slate-900">{{ a.providerName || 'Doctor' }}</p>
+                        <p class="text-[10px] text-slate-500 font-mono select-all">ID: {{ a.providerId }}</p>
+                      </td>
+                      <td class="py-4 px-6"><span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold" [ngClass]="getStatusColor(a.status)">{{ a.status }}</span></td>
+                      <td class="py-4 px-6 text-right">
+                        <button (click)="handleDelete(a.appointmentId)"
+                          class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="Delete Appointment">
+                          <lucide-icon [name]="Trash2" class="w-4 h-4"></lucide-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

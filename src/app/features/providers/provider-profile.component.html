@@ -1,0 +1,136 @@
+<div class="min-h-screen bg-[#f8fafc] font-sans flex flex-col relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none"></div>
+  <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-indigo-100/50 via-teal-100/30 to-transparent rounded-full blur-[80px] pointer-events-none"></div>
+
+  <app-navbar></app-navbar>
+
+  @if (loading()) {
+    <div class="min-h-screen flex items-center justify-center">
+      <span class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></span>
+    </div>
+  } @else if (!provider()) {
+    <div class="min-h-screen flex items-center justify-center">
+      <div class="text-center bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-sm">
+        <p class="text-slate-500 font-medium mb-4">Provider not found or unavailable.</p>
+        <a routerLink="/providers" class="text-indigo-600 font-bold hover:text-indigo-800 transition-colors inline-flex items-center gap-1">
+          <lucide-icon [name]="ArrowLeft" class="w-4 h-4"></lucide-icon> Go back
+        </a>
+      </div>
+    </div>
+  } @else {
+    <div class="max-w-5xl mx-auto px-6 py-10 relative z-10 w-full">
+      <a routerLink="/providers" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-bold text-sm mb-6 transition-colors">
+        <lucide-icon [name]="ArrowLeft" class="w-4 h-4"></lucide-icon> Back to Providers
+      </a>
+
+      <!-- Profile header -->
+      <div class="bg-white rounded-[2rem] border border-slate-200 p-8 mb-8 shadow-sm">
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+          <div class="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-indigo-500 to-teal-400 flex items-center justify-center text-4xl font-black text-white shrink-0 shadow-inner">
+            {{ getInitials(provider()!.fullName || provider()!.specialization) }}
+          </div>
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+              <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">{{ provider()!.fullName || 'Dr. ' + provider()!.specialization }}</h1>
+              @if (provider()!.isVerified) {
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100 tracking-wider">
+                  <lucide-icon [name]="CheckCircle" class="w-3.5 h-3.5 mr-1.5"></lucide-icon>Verified
+                </span>
+              }
+            </div>
+            <p class="text-indigo-600 font-extrabold text-lg mb-1">{{ provider()!.specialization }}</p>
+            <p class="text-slate-500 font-medium text-sm mb-4">{{ provider()!.qualification }}</p>
+
+            <div class="flex flex-wrap gap-5 text-sm font-medium text-slate-600">
+              @if (provider()!.clinicName) {
+                <span class="flex items-center gap-1.5"><lucide-icon [name]="Stethoscope" class="w-4 h-4 text-slate-400"></lucide-icon>{{ provider()!.clinicName }}</span>
+              }
+              @if (provider()!.clinicAddress) {
+                <span class="flex items-center gap-1.5"><lucide-icon [name]="MapPin" class="w-4 h-4 text-slate-400"></lucide-icon>{{ provider()!.clinicAddress }}</span>
+              }
+              @if (provider()!.experienceYears) {
+                <span class="flex items-center gap-1.5"><lucide-icon [name]="Clock" class="w-4 h-4 text-slate-400"></lucide-icon>{{ provider()!.experienceYears }} yrs experience</span>
+              }
+              <span class="flex items-center gap-1.5 text-amber-500 font-bold">
+                <lucide-icon [name]="Star" class="w-4 h-4"></lucide-icon>{{ provider()?.avgRating?.toFixed(1) || '0.0' }} ({{ reviews().length }} reviews)
+              </span>
+            </div>
+
+            @if (provider()!.bio) {
+              <p class="text-slate-700 mt-6 text-sm leading-relaxed max-w-3xl">{{ provider()!.bio }}</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Slot booking -->
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 p-8 shadow-sm">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">
+            <lucide-icon [name]="Calendar" class="w-5 h-5 text-indigo-500"></lucide-icon>Available Slots
+          </h2>
+          <input
+            type="date"
+            [ngModel]="selectedDate()"
+            (ngModelChange)="selectedDate.set($event)"
+            [min]="today"
+            (change)="onDateChange()"
+            class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all mb-6"
+          />
+          @if (slots().length === 0) {
+            <div class="text-center py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+              <lucide-icon [name]="Clock" class="w-10 h-10 text-slate-300 mx-auto mb-3"></lucide-icon>
+              <p class="text-slate-600 font-bold">No available slots</p>
+              <p class="text-slate-400 text-sm mt-1">Try selecting a different date</p>
+            </div>
+          } @else {
+            <div class="grid grid-cols-2 gap-3">
+              @for (slot of slots(); track slot.slotId) {
+                <button
+                  (click)="handleBook(slot)"
+                  class="p-3.5 rounded-xl border border-teal-200 bg-teal-50 text-teal-800 text-sm font-bold hover:bg-teal-100 hover:border-teal-300 hover:shadow-sm transition-all text-center flex flex-col items-center gap-1"
+                >
+                  <span>{{ formatTime(slot.startTime) }} – {{ formatTime(slot.endTime) }}</span>
+                  <span class="text-xs font-medium text-teal-600">{{ slot.durationMinutes }} min</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Reviews -->
+        <div class="bg-white rounded-[1.5rem] border border-slate-200 p-8 shadow-sm">
+          <h2 class="text-xl font-extrabold text-slate-900 mb-6 flex items-center gap-2">
+            <lucide-icon [name]="MessageSquare" class="w-5 h-5 text-indigo-500"></lucide-icon>Patient Reviews
+          </h2>
+          @if (reviews().length === 0) {
+            <div class="text-center py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+              <lucide-icon [name]="Star" class="w-10 h-10 text-slate-300 mx-auto mb-3"></lucide-icon>
+              <p class="text-slate-600 font-bold">No reviews yet</p>
+              <p class="text-slate-400 text-sm mt-1">Be the first to review this provider</p>
+            </div>
+          } @else {
+            <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              @for (r of reviews(); track r.reviewId) {
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200">
+                  <div class="flex items-center gap-3 mb-3">
+                    <div class="flex items-center gap-0.5">
+                      @for (filled of getStars(r.rating); track $index) {
+                        <span class="text-xl" [ngClass]="filled ? 'text-amber-400' : 'text-slate-200'">★</span>
+                      }
+                    </div>
+                    <span class="text-slate-400 text-xs font-bold ml-auto">{{ formatDate(r.reviewDate) }}</span>
+                  </div>
+                  <p class="text-slate-700 font-medium text-sm">{{ r.comment || 'Great experience!' }}</p>
+                  @if (r.isAnonymous) {
+                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider mt-3">Anonymous</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
