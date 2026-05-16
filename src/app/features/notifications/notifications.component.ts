@@ -107,7 +107,7 @@ export class NotificationsComponent implements OnInit {
 
   private executeFetch(requests: any[]) {
     forkJoin(requests as any).subscribe({
-      next: (responses: any[][]) => {
+      next: (responses: any) => {
         // Deduplicate by notificationId in case same notification appears in multiple fetches
         const allNotifs = ([] as any[]).concat(...responses);
         const seen = new Set<string>();
